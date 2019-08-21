@@ -216,13 +216,12 @@ pinv(v::QuasiTransposeAbsVec, tol::Real = 0) = pinv(conj(v.parent)).parent
 /(u::QuasiTransposeAbsVec, A::QuasiAdjoint{<:Any,<:AbstractQuasiMatrix}) = transpose(conj(A.parent) \ u.parent) # technically should be transpose(copy(transpose(copy(A))) \ u.parent)
 
 
-function materialize(M::Mul2{<:Any,<:Any,<:QuasiAdjoint,<:QuasiAdjoint})
-    Ac,Bc = M.args
-    apply(*,parent(Bc),parent(Ac))'
-end
-
 function adjoint(M::Mul)
     Mul(reverse(adjoint.(M.args))...)
 end
 
 ==(A::QuasiAdjoint, B::QuasiAdjoint) = parent(A) == parent(B)
+
+
+MemoryLayout(::Type{QuasiTranspose{T,P}}) where {T,P} = transposelayout(MemoryLayout(P))
+MemoryLayout(::Type{QuasiAdjoint{T,P}}) where {T,P} = adjointlayout(T, MemoryLayout(P))
